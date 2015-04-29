@@ -1,0 +1,159 @@
+# $Id$
+#
+# Russian translation of Drupal (general)
+# Copyright 2015 <support@wayforpay.com>
+# Generated from files:
+#  uc_wayforpay.module: n/a
+#  uc_wayforpay.info: n/a
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"POT-Creation-Date: 2012-03-16 17:30+0200\n"
+"PO-Revision-Date: 2012-03-16 17:53+0200\n"
+"Language-Team: Russian <EMAIL@ADDRESS>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=((((n%10)==1)&&((n%100)!=11))?(0):(((((n%10)>=2)&&((n%10)<=4))&&(((n%100)<10)||((n%100)>=20)))?(1):2));\n"
+
+#: uc_wayforpay.module:71
+msgid "wayforpay"
+msgstr "wayforpay"
+
+#: uc_wayforpay.module:74;35
+#: uc_wayforpay.info:0
+msgid "WayForPay"
+msgstr "WayForPay"
+
+#: uc_wayforpay.module:76
+msgid "Redirect to liqpay to pay by."
+msgstr "Перенаправляет пользователя на сайт wayforpay для оплаты"
+
+#: uc_wayforpay.module:97;169
+msgid "Currency"
+msgstr "Валюта"
+
+#: uc_wayforpay.module:98;177;261
+msgid "Merchant ID"
+msgstr "ID мерчанта"
+
+#: uc_wayforpay.module:99
+msgid "Secret key"
+msgstr "Подпись мерчанта"
+
+#: uc_wayforpay.module:100;185
+msgid "Rate"
+msgstr "Ставка"
+
+#: uc_wayforpay.module:101;109
+msgid "Edit"
+msgstr "Редактировать"
+
+#: uc_wayforpay.module:121
+msgid "Delete checked currency"
+msgstr "Удалить выбранную валюту"
+
+#: uc_wayforpay.module:125
+msgid "You have not any added currencies"
+msgstr "У Вас нет добавленных валют"
+
+#: uc_wayforpay.module:140
+msgid "You successfully deleted currency - @currency."
+msgstr "@currencу - валюта успешно удалена"
+
+#: uc_wayforpay.module:172
+msgid "Please, select currency."
+msgstr "Пожалуйста, введите валюту"
+
+#: uc_wayforpay.module:180
+msgid "Please, enter MERCHANT ID."
+msgstr "Пожалуйста, ID мерчанта"
+
+#: uc_wayforpay.module:188
+msgid "Please, enter rate of currency."
+msgstr "Пожалуйста, введите ставку по этой валюте"
+
+#: uc_wayforpay.module:193;267
+msgid "Signature"
+msgstr "Подпись мерчанта"
+
+#: uc_wayforpay.module:196
+msgid "Please enter signature."
+msgstr "Пожалуйста введите подпись мерчанта"
+
+#: uc_wayforpay.module:290
+msgid "Cancel"
+msgstr "Отмена"
+
+#: uc_wayforpay.module:297
+msgid "Back"
+msgstr "Назад"
+
+#: uc_wayforpay.module:348
+msgid "What type of currency will be used."
+msgstr "Какой тип валюты будет использован"
+
+#: uc_wayforpay.module:445
+msgid "Place your order via WayForPay"
+msgstr "Оформить заказ через WayForPay"
+
+#: uc_wayforpay.module:473
+msgid "Status error"
+msgstr "Ошибка"
+
+#: uc_wayforpay.module:481
+msgid "An error has occurred during payment.  Please contact us to ensure your order has submitted."
+msgstr "Во время платежа возникла ошибка. Пожалуйста свяжитесь с нами."
+
+#: uc_wayforpay.module:516
+msgid "This number does not match the original price"
+msgstr ""
+
+#: uc_wayforpay.module:521
+msgid "Your currency does not match the original"
+msgstr ""
+
+#: uc_wayforpay.module:527
+msgid "Security check failed"
+msgstr "Ошибка подписи мерчанта"
+
+#: uc_wayforpay.module:536
+msgid "Payment from phone %sender_phone by %pay_way"
+msgstr "Платеж по %pay_way с номером телефона %sender_phone"
+
+#: uc_wayforpay.module:540
+msgid "A payment has been accepted."
+msgstr "Платеж принят в обработку"
+
+#: uc_wayforpay.module:635
+msgid "Undefined"
+msgstr "Неопределенный"
+
+#: uc_wayforpay.module:23
+msgid "Internal Data"
+msgstr "Внутренние данные"
+
+#: uc_wayforpay.module:29
+msgid "WayForPay processing"
+msgstr "WayForPay обработка"
+
+#: uc_wayforpay.module:42
+msgid "Overview"
+msgstr "Обзор"
+
+#: uc_wayforpay.module:48
+msgid "Add currency"
+msgstr "Добавить валюду"
+
+#: uc_wayforpay.module:56
+msgid "Edit currency"
+msgstr "Редактировать валюту"
+
+#: uc_wayforpay.info:0
+msgid "WayForPay payment gateway."
+msgstr "Платежный шлюз WayForPay"
+
+#: uc_wayforpay.info:0
+msgid "Ubercart - payment"
+msgstr "Ubercart - платеж"

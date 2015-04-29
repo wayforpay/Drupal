@@ -1,0 +1,404 @@
+<?php
+
+/**
+ * @file
+ * Module for work with service WayForPay. Module uc_wayforpay add in ubercart new type payment.
+ */
+
+
+include_once(dirname(__FILE__) . '/class/wayforpay.cls.php');
+
+/**
+ * Implements hook_permisson().
+ */
+function uc_wayforpay_permission() {
+  return array(
+    'administer uc_wayforpay' => array(
+      'title' => t('Administer WayForPay Payment Gateway'),
+      'description' => t('Change admin settings'),
+    ),
+  );
+}
+
+/**
+ * Implements hook_menu().
+ */
+function uc_wayforpay_menu() {
+  $items = array();
+  $items['admin/store/settings/payment/method/wayforpay'] = array(
+    'title' => 'WayForPay Payments',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('uc_wayforpay_list'),
+    'access arguments' => array('administer uc_wayforpay'),
+    'type' => MENU_NORMAL_ITEM,
+  );
+
+  $items['wayforpay/return_url'] = array(
+    'title' => 'wayforpay processing',
+    'page callback' => 'uc_wayforpay_return_url',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK
+  );
+
+  $items['wayforpay/service_url'] = array(
+    'title' => 'wayforpay processing',
+    'page callback' => 'uc_wayforpay_service_url',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK
+  );
+
+  return $items;
+}
+
+/**
+ * Implements hook_uc_payment_method().
+ */
+function uc_wayforpay_uc_payment_method() {
+  $methods = array();
+  $methods['wayforpay'] = array(
+    'id' => 'wayforpay',
+    'name' => t('wayforpay'),
+    'title' => theme('uc_wayforpay_payment_method_title'),
+    'desc' => t('Redirect to wayforpay to pay by.'),
+    'callback' => 'uc_payment_method_wayforpay',
+    'weight' => 4,
+    'checkout' => TRUE,
+    'no_gateway' => TRUE,
+  );
+  return $methods;
+}
+
+/**
+ * Adds wayforpay settings to the payment method settings form.
+ *
+ * @see uc_wayforpay_uc_payment_method
+ */
+function uc_payment_method_wayforpay($op, &$order, $form = NULL, &$form_state = NULL) {
+  switch ($op) {
+    case 'settings':
+      $form = uc_wayforpay_list($form, $form_state);
+      unset($form['submit']);
+      $form['#submit'][] = 'uc_wayforpay_list_submit';
+      return $form;
+  }
+}
+
+/**
+ * Callback for wayforpay payment page settings
+ */
+function uc_wayforpay_list($form, &$form_state) {
+  $form = array();
+//    $curType = array('UAH' => 'Украинская гривна',
+//        'RUB' => 'Российский рубль',
+//        'USD' => 'Доллар США',
+//        'EUR' => 'Евро');
+  $languages = array(
+    'RU' => 'Русский',
+    'UA' => 'Украинский',
+    'EN' => 'Английский'
+  );
+
+  $data = db_select('uc_wayforpay_config', 'ulr')->fields('ulr', array(
+    'merchant_id',
+    'secret_key',
+    'currency',
+    'returnUrl',
+    'serviceUrl',
+    'language',
+  ))->execute()->fetchObject();
+
+  $form['bmerch'] = array(
+    '#type' => 'hidden',
+    '#value' => @$data->merchant_id
+  );
+
+  $form['merchant_id'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Merchant ID'),
+    '#default_value' => @$data->merchant_id,
+    '#size' => 40,
+    '#maxlength' => 100,
+    '#required' => TRUE
+  );
+
+  $form['secret_key'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Secret key'),
+    '#default_value' => @$data->secret_key,
+    '#size' => 40,
+    '#maxlength' => 100,
+    '#required' => TRUE
+  );
+//    $form['currency'] = array('#type' => 'select',
+//        '#title' => t('Currency'),
+//        '#default_value' => @$data->currency,
+//        '#options' => $curType,
+//        '#description' => t("Please, select currency."),
+//        '#required' => TRUE,);
+  $form['returnUrl'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Return Url'),
+    '#default_value' => @$data->serviceUrl,
+    '#description' => t("You can use http://{domain}/wayforpay/return_url"),
+    '#size' => 60,
+    '#maxlength' => 255,
+    '#required' => FALSE
+  );
+  $form['serviceUrl'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Service Url'),
+    '#default_value' => @$data->serviceUrl,
+    '#description' => t("You can use http://{domain}/wayforpay/service_url"),
+    '#size' => 60,
+    '#maxlength' => 255,
+    '#required' => FALSE
+  );
+  $form['language'] = array(
+    '#type' => 'select',
+    '#title' => t('LANGUAGE'),
+    '#default_value' => @$data->language,
+    '#description' => t("Choose language of payment page"),
+    '#options' => $languages,
+    '#required' => FALSE
+  );
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Submit settings'),
+  );
+
+  return $form;
+}
+
+
+function uc_wayforpay_list_submit($form, &$form_state) {
+
+  db_delete('uc_wayforpay_config')
+    ->condition('merchant_id', $form_state['values']['bmerch'])
+    ->execute();
+
+  db_insert('uc_wayforpay_config')->fields(array(
+    'merchant_id' => $form_state['values']['merchant_id'],
+    'secret_key' => $form_state['values']['secret_key'],
+    'currency' => isset($form_state['values']['currency']) ? $form_state['values']['currency'] : '',
+    'returnUrl' => $form_state['values']['returnUrl'],
+    'serviceUrl' => $form_state['values']['serviceUrl'],
+    'language' => $form_state['values']['language']
+  ))->execute();
+
+  drupal_set_message(t('You successfully saved'));
+}
+
+
+/**
+ * Implements hook_theme().
+ */
+function uc_wayforpay_theme($existing, $type, $theme, $path) {
+  return array('uc_wayforpay_payment_method_title' => array('variables' => array(),));
+}
+
+/**
+ * Returns HTML for payment method title
+ *
+ * @ingroup themeable
+ */
+function theme_uc_wayforpay_payment_method_title() {
+  $path = base_path() . drupal_get_path('module', 'uc_wayforpay') . '/images/w4p.png';
+  $title = t('wayforpay');
+  $title .= '<br />';
+  $attr = array(
+    'path' => $path,
+    'alt' => 'WayForPay Payment Gateway',
+    'attributes' => array('class' => 'wayforpay-title-image')
+  );
+  $title .= theme_image($attr);
+  return $title;
+}
+
+
+
+/**
+ * Implements hook_form_alter().
+ */
+function uc_wayforpay_form_alter(&$form, &$form_state, $form_id) {
+  if ($form_id == 'uc_cart_checkout_review_form') {
+    $order = $form_state['uc_order'];
+    if ($order->payment_method == 'wayforpay') {
+
+      unset($form['actions']['submit']);
+      $form['#prefix'] = '<table ><tr><td>';
+      $f = drupal_get_form('uc_wayforpay_submit_form', $order);
+      $form['#suffix'] = '</td><td>' . drupal_render($f) . '</td></tr></table>';
+    }
+  }
+}
+
+
+function getwayforpaySettings() {
+  return db_select('uc_wayforpay_config', 'ulr')->fields('ulr', array(
+    'merchant_id',
+    'secret_key',
+    'currency',
+    'returnUrl',
+    'serviceUrl',
+    'language'
+  ))->execute()->fetchObject();
+}
+
+
+function uc_wayforpay_submit_form($form, &$form_state, $order) {
+  $txnid_count = db_select('uc_wayforpay_transaction', 'ult')
+    ->fields('ult', array('txnid'))
+    ->condition('txnid', $order->order_id)
+    ->execute()
+    ->fetchField();
+  $w4p = new Wayforpay();
+
+  if ($txnid_count) {
+    db_update('uc_wayforpay_transaction')->fields(array(
+      'created' => $order->created,
+      'status' => 0
+    ))->condition('txnid', $order->order_id)->execute();
+  }
+  else {
+    $txnid = db_insert('uc_wayforpay_transaction')->fields(array(
+      'txnid' => $order->order_id,
+      'amount' => $order->order_total,
+      'description' => "",
+      'system' => "",
+      'created' => $order->created,
+      'status' => '0'
+    ))->execute();
+  }
+
+  $wayforpaySettings = getwayforpaySettings();
+
+  $fields = array(
+    'orderReference' => $order->order_id . wayforpay::ORDER_SEPARATOR . time(),
+    'merchantAccount' => $wayforpaySettings->merchant_id,
+    'orderDate' => $order->created,
+    'amount' => round($order->order_total, 2),
+    'currency' => 'UAH',
+    'returnUrl' => $wayforpaySettings->returnUrl,
+    'serviceUrl' => $wayforpaySettings->serviceUrl,
+    'language' => $wayforpaySettings->language
+  );
+  $fields['merchantAuthType'] = 'simpleSignature';
+  $fields['merchantDomainName'] = $_SERVER['HTTP_HOST'];
+  $fields['merchantTransactionSecureType'] = 'AUTO';
+
+  $productNames = array();
+  $productQty = array();
+  $productPrices = array();
+  foreach ($order->products as $product) {
+    $productNames[] = $product->title;
+    $productPrices[] = round($product->price, 2);
+    $productQty[] = $product->qty;
+  }
+  $fields['productName'] = $productNames;
+  $fields['productPrice'] = $productPrices;
+  $fields['productCount'] = $productQty;
+
+  /**
+   * Check phone
+   */
+  $phone = str_replace(array('+', ' ', '(', ')'), array(
+    '',
+    '',
+    '',
+    ''
+  ), $order->billing_phone);
+  if (strlen($phone) == 10) {
+    $phone = '38' . $phone;
+  }
+  elseif (strlen($phone) == 11) {
+    $phone = '3' . $phone;
+  }
+
+  $fields['clientFirstName'] = $order->billing_first_name;
+  $fields['clientLastName'] = $order->billing_last_name;
+  $fields['clientEmail'] = $order->primary_email;
+  $fields['clientPhone'] = $phone;
+  $fields['clientCity'] = $order->billing_city;
+  $fields['clientAddress'] = $order->billing_street1 . ' ' . $order->billing_street2;
+  if ($order->billing_country == 804) {
+    $fields['clientCountry'] = 'UKR';
+  }
+
+  $fields['merchantSignature'] = $w4p->getRequestSignature($fields);
+
+  return generateForm($fields, wayforpay::URL);
+}
+
+function generateForm($data, $url = '') {
+  $form['#action'] = wayforpay::URL;
+  foreach ($data as $k => $v) {
+    if (!is_array($v)) {
+      $form[$k] = array(
+        '#type' => 'hidden',
+        '#value' => $v
+      );
+    }
+    else {
+      $i = 0;
+      foreach ($v as $val) {
+        $form[$k . '[]'] = array(
+          '#type' => 'hidden',
+          '#value' => $val
+        );
+      }
+    }
+  }
+
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Pay')
+  );
+
+  return $form;
+}
+
+
+/**
+ * Callback function with result.
+ */
+function uc_wayforpay_return_url() {
+  $data = $_POST;
+  if (empty($data)) {
+    drupal_goto('cart');
+  }
+  $w4p = new Wayforpay();
+  list($orderId,) = explode(wayforpay::ORDER_SEPARATOR, $data['orderReference']);
+
+  $paymentInfo = $w4p->isPaymentValid($data);
+
+  if ($paymentInfo === TRUE) {
+    uc_order_update_status($orderId, 'completed');
+    $_SESSION['uc_checkout'][$_SESSION['cart_order']]['do_complete'] = TRUE;
+    drupal_goto('cart/checkout/complete');
+  }
+  else {
+    drupal_set_message($paymentInfo, 'warning');
+    drupal_goto('cart');
+  }
+}
+
+function uc_wayforpay_service_url() {
+
+  $data = json_decode(file_get_contents("php://input"), TRUE);
+  if (empty($data)) {
+    drupal_goto('cart');
+  }
+  $w4p = new Wayforpay();
+  list($orderId,) = explode(wayforpay::ORDER_SEPARATOR, $data['orderReference']);
+
+  $paymentInfo = $w4p->isPaymentValid($data);
+
+  if ($paymentInfo === TRUE) {
+    uc_order_update_status($orderId, 'completed');
+    echo $w4p->getAnswerToGateWay($data);
+  }
+  else {
+    exit();
+  }
+}
+

@@ -1,0 +1,116 @@
+<?php
+
+/**
+ * @file
+ * Install file for module uc_wayforpay
+ */
+
+/**
+ * Implements hook_schema().
+ */
+function uc_wayforpay_schema() {
+
+  $schema['uc_wayforpay_transaction'] = array(
+    'description' => 'Completed Transactions',
+    'fields' => array(
+      'txnid' => array(
+        'type' => 'int',
+        'size' => 'normal',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => 'The transactions id.',
+      ),
+      'amount' => array(
+        'type' => 'numeric',
+        'unsigned' => TRUE,
+        'precision' => 6,
+        'scale' => 2,
+        'default' => 0.00,
+        'description' => 'The transactions amount.',
+      ),
+      'description' => array(
+        'type' => 'text',
+        'size' => 'normal',
+        'not null' => TRUE,
+        'description' => 'Info about transactions.',
+      ),
+
+      'created' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'size' => 'normal',
+        'description' => 'Time of payment creation',
+      ),
+      'system' => array(
+        'type' => 'varchar',
+        'length' => 10,
+        'not null' => TRUE,
+       // 'default' => '',
+        'description' => 'system type',
+      ),
+      'status' => array(
+        'type' => 'varchar',
+        'length' => 10,
+        'not null' => TRUE,
+       // 'default' => '',
+        'description' => 'system type',
+      ),
+    ),
+    'primary key' => array('txnid'),
+    'indexes' => array('txnid' => array('txnid')),
+  );
+
+
+  $schema['uc_wayforpay_config'] = array(
+    'description' => 'Info about',
+    'fields' => array(
+      'merchant_id' => array(
+        'type' => 'varchar',
+        'length' => 13,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'The merchant identificator.',
+      ),
+      'secret_key' => array(
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'The secret key called signature.',
+      ),
+      'currency' => array(
+        'type' => 'varchar',
+        'length' => 3,
+        'not null' => TRUE,
+        'default' => 'UAH',
+        'description' => 'Type of currency.',
+      ),
+       'returnUrl' => array(
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'Return url.',
+      ),
+       'serviceUrl' => array(
+           'type' => 'varchar',
+           'length' => 64,
+           'not null' => TRUE,
+           'default' => '',
+           'description' => 'Service url.',
+         ),
+      'language' => array(
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'Language of payment page.',
+      ),
+    ),
+    'primary key' => array('merchant_id'),
+  );
+
+  return $schema;
+}
