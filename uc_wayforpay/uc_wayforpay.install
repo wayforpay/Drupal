@@ -68,7 +68,7 @@ function uc_wayforpay_schema() {
     'fields' => array(
       'merchant_id' => array(
         'type' => 'varchar',
-        'length' => 13,
+        'length' => 64,
         'not null' => TRUE,
         'default' => '',
         'description' => 'The merchant identificator.',
