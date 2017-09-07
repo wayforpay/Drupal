@@ -277,7 +277,9 @@ function uc_wayforpay_submit_form($form, &$form_state, $order) {
     'merchantAccount' => $wayforpaySettings->merchant_id,
     'orderDate' => $order->created,
     'amount' => round($order->order_total, 2),
-    'currency' => 'UAH',
+    'currency' => (empty($wayforpaySettings->currency)
+        ?'UAH'
+        : $wayforpaySettings->currency),
     'returnUrl' => $wayforpaySettings->returnUrl,
     'serviceUrl' => $wayforpaySettings->serviceUrl,
     'language' => $wayforpaySettings->language
